@@ -4,44 +4,94 @@ session_start();
 
 class loginModel{
 
-
-	private  $dbusername = "";
-	private  $server = "";
-	private  $dbpassword = "";
-	private  $database = "";
+    protected $dbUsername = 'root';
+    protected $dbPassword = 'root';
+    protected $dbConnstring = 'mysql:host=localhost;dbname=users';
+    protected $dbConnection;
+    protected $dbTable;
 
 	private function connectdb(){
 
-		
-		 $db_handle = mysql_connect($this->server, $this->dbusername, $this->dbpassword);
-		 $db_found = mysql_select_db($this->database, $db_handle);
+        /*$mysqli = new mysqli("localhost", "root", "root", "users");
+        return $mysqli;*/
 
-		 if($db_found){
-		 	return $db_handle;
-		 }else {
-		        print "Error: Unable to find Database";
-		        mysql_close($db_handle);
-		    }
+        if ($this->dbConnection == NULL)
+            $this->dbConnection = new \PDO($this->dbConnstring, $this->dbUsername, $this->dbPassword);
 
-	}
+        $this->dbConnection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        return $this->dbConnection;
+    }
+
+
+    //fenfewnfwfwlfmlwäe
+    public function insertUserToDB($name,$pass){
+
+        $db = $this->connectdb();
+
+        $sql = "INSERT INTO users (username,password) VALUES (:username,:password)";
+
+            $q = $db->prepare($sql);
+            $q->execute(array(':username'=>$name,
+                              ':password'=>$pass));
+
+    }
+
+    public function compareAddUserInfo($username,$password) {
+
+
+
+        if(strlen($password) < 6){
+            return false;
+        }
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
+
+        if($username == $db_username)
+        {
+            return false;
+        }
+
+
+        return true;
+
+    }
+
 
 	public function comparePasswordSucced($username, $password){
 
-		$db_handle = $this->connectdb();
-		$sql = "SELECT * FROM users";
-		$result = mysql_query($sql);
-		
-		
-		while ($db_field = mysql_fetch_assoc($result)) {
-		            
+      /*  $mysqli = $this->connectdb();
+		$sql = sprintf("SELECT *
+                        FROM users
+                        WHERE username = %u", $username);
+        $result = $mysqli->query($sql);
+
+        while($db_field = mysqli_fetch_assoc($result)) {
+        var_dump($db_field['username']);
 		$db_username = $db_field['username'];
 		$db_password = $db_field['password'];
-		}
-		    
-		 mysql_close($db_handle);
+        }*/
 
-		 
-        
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
 
 		 if($username == $db_username && $password == $db_password)
 		 {
@@ -49,8 +99,6 @@ class loginModel{
 		 }
 
 		 return false;
-
-
 
 
 	}
@@ -70,17 +118,17 @@ class loginModel{
 
 	public function comparePasswordWrongPass($username, $password){
 
-		$db_handle = $this->connectdb();
-		$sql = "SELECT * FROM users";
-		$result = mysql_query($sql);
-		     
-		while ($db_field = mysql_fetch_assoc($result)) {
-		            
-		$db_username = $db_field['username'];
-		$db_password = $db_field['password'];
-		}
-		     
-		 mysql_close($db_handle);
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
 
 		 if($username == $db_username && $password !== $db_password)
 		 {
@@ -96,17 +144,17 @@ class loginModel{
 
 	public function comparePasswordWrongUsername($username, $password){
 
-		$db_handle = $this->connectdb();
-		$sql = "SELECT * FROM users";
-		$result = mysql_query($sql);
-		     
-		while ($db_field = mysql_fetch_assoc($result)) {
-		            
-		$db_username = $db_field['username'];
-		$db_password = $db_field['password'];
-		}
-		     
-		 mysql_close($db_handle);
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
 
 		 if($username !== $db_username && $password == $db_password)
 		 {
@@ -122,17 +170,17 @@ class loginModel{
 
 	public function comparePasswordAllWrong($username, $password){
 
-		$db_handle = $this->connectdb();
-		$sql = "SELECT * FROM users";
-		$result = mysql_query($sql);
-		     
-		while ($db_field = mysql_fetch_assoc($result)) {
-		            
-		$db_username = $db_field['username'];
-		$db_password = $db_field['password'];
-		}
-		     
-		 mysql_close($db_handle);
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
 
 		 if($username !== $db_username && $password !== $db_password)
 		 {
@@ -140,8 +188,6 @@ class loginModel{
 		 }
 
 		 return false;
-
-
 
 
 	}	
@@ -192,9 +238,6 @@ class loginModel{
 		} 
 		return false;
 	}
-
-
-
 
 
 	

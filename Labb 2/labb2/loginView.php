@@ -126,8 +126,6 @@ class loginView{
 	public function getUsername() {
 		//Hämta och kontrollera att det finn användarnamn.
 
-		
-
 		if(isset($_POST['username']))
 		{
 			return $_POST['username'];
@@ -151,6 +149,7 @@ class loginView{
 	Lösenord: <input type='password' name='password'>
 	Håll mig inloggad: <input type='checkbox' name='checkbox'>
 	<input type='submit' name='Login' value='Logga in'>
+	<input type='submit' name='AddUserButton' action='?Register' value='Lägg till användare'><br>
 
 	</form>";
 
@@ -159,11 +158,12 @@ class loginView{
 	public function displayForm($message){
 
 	$this->render("$message
-		<form method='post'>
+    <form method='post'>
 	Användarnamn: <input type='text' name='username'>
 	Lösenord: <input type='password' name='password'>
 	Håll mig inloggad: <input type='checkbox' name='checkbox'>
 	<input type='submit' name='Login' value='Logga in'>
+	<input type='submit' name='AddUserButton' value='Lägg till användare'><br>
 
 	</form>","");
 
@@ -249,10 +249,6 @@ class loginView{
 	</html>
 
 
-
-
-
-
 			"	;
 
 
@@ -334,6 +330,16 @@ class loginView{
 		echo $html;
 	}
 
+
+
+    public function didUserPressAddUser(){
+
+        if(isset($_POST['AddUserButton']))
+        {
+            return true;
+        }
+        return false;
+    }
 	public function didUserLogout(){
 
 		if(isset($_POST['Logout']))
@@ -384,7 +390,7 @@ class loginView{
 	}
 
 	public function loadUserCookies(){
-
+;
 		if(isset($_COOKIE[self::$cookieUsername]))
 		{
 			$returnstring = $_COOKIE[self::$cookieUsername];
@@ -400,7 +406,6 @@ class loginView{
 	}
 
 	public function loadPassCookies(){
-
 		if(isset($_COOKIE[self::$cookiePassword]))
 		{
 			$returnstr = $_COOKIE[self::$cookiePassword];
@@ -447,10 +452,6 @@ class loginView{
 
 		return $this->userAgent2;
 	}
-	
-	
-
-
 
 
 }

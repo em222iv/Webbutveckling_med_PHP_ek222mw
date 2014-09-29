@@ -2,6 +2,7 @@
 
 require_once("loginView.php");
 require_once("loginModel.php");
+require_once("AddUserView.php");
 
 
 
@@ -9,27 +10,42 @@ class login{
 
 private $m_loginView;
 private $m_loginModel;
-public function __construct(){
+private $m_AddUserView;
 
+public function __construct(){
+$this->m_AddUserView = new AddUserView();
 $this->m_loginView = new loginView();
 $this->m_loginModel = new loginModel();
 
 }
 
+
 		public function doControll(){
 
-			//handle input 
+			//handle input
 
-		
-		
+        if($this->m_loginView->didUserPressAddUser()){
+
+         return  $this->m_AddUserView->AddUserForm();
+        }
+        if($this->m_AddUserView->getUsername() && $this->m_AddUserView->getPassword()) {
+
+            if($this->m_loginModel->compareAddUserInfo($this->m_AddUserView->AddUserForm(), $this->m_AddUserView->getPassword())){
+                $this->m_loginModel->insertUserToDB($this->m_AddUserView->AddUserForm(), $this->m_AddUserView->getPassword());
+                return $this->m_loginView->getForm();
+            }
+
+
+        }
+
 		$this->m_loginView->setAgent2();
 		if($this->m_loginModel->isLoggedIn() && $this->m_loginModel->compareAgent($this->m_loginView->getAgent2())){
 			if($this->m_loginView->didUserLogout()){
 				$this->m_loginModel->Logout();
 				$this->m_loginView->DisplayUserPressedLogout();
+
 			}else
 			{
-				
 				$this->m_loginView->DisplayAlreadyLoggedin();
 				
 			}
@@ -54,15 +70,6 @@ $this->m_loginModel = new loginModel();
 			}
 
 		}
-
-						
-
-					
-		
-
-		
-
-
 
 
 
@@ -147,6 +154,5 @@ $this->m_loginModel = new loginModel();
 	
 
 	}
-
 }
 ?>

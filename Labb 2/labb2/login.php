@@ -22,20 +22,36 @@ $this->m_loginModel = new loginModel();
 
 		public function doControll(){
 
-			//handle input
+		//My code for lab4 start here and goes down to row 50.
 
         if($this->m_loginView->didUserPressAddUser()){
+            $this->m_loginModel->addFormSession();
+            return  $this->m_AddUserView->AddUserForm();
 
-         return  $this->m_AddUserView->AddUserForm();
         }
-        if($this->m_AddUserView->getUsername() && $this->m_AddUserView->getPassword()) {
+        //if user pressed login, a session i started to keep track where he is navigating
+        // since the code i got didnt use any form actions or gets i kept it that way
+        if($_SESSION["addform"]){
+            //check if the registerbutton was clicked
+            if($this->m_AddUserView->getNewUserInfo()){
+                //compares if the input was valid
+                if($this->m_loginModel->compareAddUserInfo($this->m_AddUserView->getUsername(), $this->m_AddUserView->getPassword(), $this->m_AddUserView->getPasswordVerification())){
+                    //inserts the information to db
+                    $this->m_loginModel->insertUserToDB($this->m_AddUserView->getUsername(), $this->m_AddUserView->getPassword());
 
-            if($this->m_loginModel->compareAddUserInfo($this->m_AddUserView->AddUserForm(), $this->m_AddUserView->getPassword())){
-                $this->m_loginModel->insertUserToDB($this->m_AddUserView->AddUserForm(), $this->m_AddUserView->getPassword());
-                return $this->m_loginView->getForm();
+                    return $this->m_loginView->showLoginAddUserSucceed();
+
+                }elseif($_SESSION["addform"]) {
+                    //presenting error msgs
+                    $this->m_AddUserView->errorHandler($this->m_loginModel->getErrorMessage());
+                    $this->m_AddUserView->valueHandler($this->m_loginModel->getUsername());
+                    return $this->m_AddUserView->AddUserForm();
+                }else {
+                    // incase any of the earlier didnt come through the user wants to get back to login page
+                    unset($_SESSION["addform"]);
+                    $this->m_loginView->showLoginLogout();
+                }
             }
-
-
         }
 
 		$this->m_loginView->setAgent2();
@@ -46,6 +62,8 @@ $this->m_loginModel = new loginModel();
 
 			}else
 			{
+                $this->m_loginModel->loggedInUser($this->m_AddUserView->getUsername());
+                $this->m_loginView->loggedInUserHandler($this->m_loginModel->getUsername());
 				$this->m_loginView->DisplayAlreadyLoggedin();
 				
 			}
@@ -94,9 +112,9 @@ $this->m_loginModel = new loginModel();
 			{
 				$this->m_loginView->DisplayEmptyPassword();
 			}
-			
+
 			elseif($this->m_loginModel->comparePasswordSucced($this->m_loginView->getUsername(), $this->m_loginView->getPassword()))
-			{	
+			{
 
 				$this->m_loginModel->Login();
 				$this->m_loginView->setAgent();
@@ -113,6 +131,9 @@ $this->m_loginModel = new loginModel();
 				
 				}
 				else{
+                    $this->m_loginModel->loggedInUser($inputUsername);
+                    $this->m_loginView->loggedInUserHandler($this->m_loginModel->getUsername());
+
 					$this->m_loginView->DisplaySuccessfulLogin();
 				}
 
@@ -121,7 +142,7 @@ $this->m_loginModel = new loginModel();
 					$this->m_loginView->getUsername(), $this->m_loginView->getPassword()
 				)
 			)
-			{	
+			{
 				$this->m_loginView->DisplayCorrUserWrongPass();
 			}
 			elseif(
@@ -142,16 +163,17 @@ $this->m_loginModel = new loginModel();
 			}
 			
 		}
-        
+
+
 
 		if(!$this->m_loginModel->isLoggedIn() && !$this->m_loginView->didUserLogout() && !$this->m_loginView->didUserLogin() 
 			&& $this->m_loginView->loadUserCookies() == NULL && $this->m_loginView->loadPassCookies() == NULL
 			)
 		{
-			$this->m_loginView->showLoginLogout();
+		    $this->m_loginView->showLoginLogout();
+
 		}
 		
-	
 
 	}
 }

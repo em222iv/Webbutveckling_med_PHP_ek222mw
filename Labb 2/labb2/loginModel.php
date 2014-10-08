@@ -4,16 +4,16 @@ session_start();
 
 class loginModel{
 
-    protected $dbUsername = 'root';
-    protected $dbPassword = 'root';
-    protected $dbConnstring = 'mysql:host=localhost;dbname=users';
+    protected $dbUsername = 'eerie_se';
+    protected $dbPassword = 'NyUYN8xk';
+    protected $dbConnstring = 'mysql:host=eerie.se.mysql;dbname=eerie_se';
     protected $dbConnection;
     protected $dbTable;
+    private $errorMessage;
+    private $username;
 
+    //connection was earlier in mysql. changed to PDO.
 	private function connectdb(){
-
-        /*$mysqli = new mysqli("localhost", "root", "root", "users");
-        return $mysqli;*/
 
         if ($this->dbConnection == NULL)
             $this->dbConnection = new \PDO($this->dbConnstring, $this->dbUsername, $this->dbPassword);
@@ -23,8 +23,7 @@ class loginModel{
         return $this->dbConnection;
     }
 
-
-    //fenfewnfwfwlfmlwäe
+    //inserts user info
     public function insertUserToDB($name,$pass){
 
         $db = $this->connectdb();
@@ -32,19 +31,40 @@ class loginModel{
         $sql = "INSERT INTO users (username,password) VALUES (:username,:password)";
 
             $q = $db->prepare($sql);
+
+            $hash = password_hash($pass,PASSWORD_BCRYPT);
+
             $q->execute(array(':username'=>$name,
-                              ':password'=>$pass));
+                              ':password'=>$hash));
 
     }
+    //checks if any of the input was faulty
+    public function compareAddUserInfo($username,$password,$verifyPassword) {
 
-    public function compareAddUserInfo($username,$password) {
-
-
-
-        if(strlen($password) < 6){
+        if(strlen($username) < 3 && strlen($password) < 6 && strlen($verifyPassword < 6)){
+            $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken.</br> Lösenordet är för kort. Minst 6 tecken";
             return false;
         }
+
+        if(strcmp($password, $verifyPassword) !== 0){
+            $this->errorMessage = "Lösenorden matcher inte";
+            return false;
+        }
+        if(strlen($password) < 6){
+            $this->errorMessage = "Lösenordet är för kort. Minst 6 tecken";
+            return false;
+        }
+        if(strlen($verifyPassword) < 6){
+            $this->errorMessage = "Lösenordet är för kort. Minst 6 tecken";
+            return false;
+        }
+        if(strlen($username) < 3){
+             $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken";
+            return false;
+        }
+
         $db = $this->connectdb();
+
 
         $sql = "SELECT * FROM users WHERE username  = ?";
         $params = array($username);
@@ -56,8 +76,13 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-        if($username == $db_username)
-        {
+        if($username == $db_username || strlen($username) < 3){
+            $this->errorMessage = "Användarnamnet är redan upptaget";
+            return false;
+        }
+        if($username != strip_tags($username)) {
+            $this->username = strip_tags($username);
+            $this->errorMessage = "Användarnamnet innehåller ogiltiga tecken";
             return false;
         }
 
@@ -67,21 +92,11 @@ class loginModel{
     }
 
 
+    //I would have wanted to combine the compare methods from here on. But i ran out of time.
 	public function comparePasswordSucced($username, $password){
 
-      /*  $mysqli = $this->connectdb();
-		$sql = sprintf("SELECT *
-                        FROM users
-                        WHERE username = %u", $username);
-        $result = $mysqli->query($sql);
-
-        while($db_field = mysqli_fetch_assoc($result)) {
-        var_dump($db_field['username']);
-		$db_username = $db_field['username'];
-		$db_password = $db_field['password'];
-        }*/
-
         $db = $this->connectdb();
+        $_SESSION["username"] = $username;
 
         $sql = "SELECT * FROM users WHERE username  = ?";
         $params = array($username);
@@ -93,7 +108,8 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username == $db_username && $password == $db_password)
+
+		 if($username == $db_username && password_verify($password, $db_password))
 		 {
 		 	return true;
 		 }
@@ -115,7 +131,6 @@ class loginModel{
 
 
 
-
 	public function comparePasswordWrongPass($username, $password){
 
         $db = $this->connectdb();
@@ -130,7 +145,7 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username == $db_username && $password !== $db_password)
+		 if($username == $db_username && !password_verify($password, $db_password))
 		 {
 		 	return true;
 		 }
@@ -156,7 +171,7 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username !== $db_username && $password == $db_password)
+		 if($username !== $db_username && password_verify($password, $db_password))
 		 {
 		 	return true;
 		 }
@@ -182,7 +197,7 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username !== $db_username && $password !== $db_password)
+		 if($username !== $db_username && !password_verify($password, $db_password))
 		 {
 		 	return true;
 		 }
@@ -190,15 +205,35 @@ class loginModel{
 		 return false;
 
 
-	}	
+	}
 
+    public function loggedInUser($username) {
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $this->username = $result[1];
+
+    }
+
+    public function addFormSession() {
+        $_SESSION["addform"] = true;
+    }
 
 	public function isLoggedIn()
 	{
 
+
 		if(isset($_SESSION["SessionUsername"])){
 
 		$saveUserSession = $_SESSION["SessionUsername"];
+
+
 		return true;
 		}
 		return false;
@@ -239,7 +274,14 @@ class loginModel{
 		return false;
 	}
 
+    public function getErrorMessage() {
+        return $this->errorMessage;
+    }
+    public function getUsername() {
+        return $this->username;
+    }
 
-	
-
+    public function getUsernameFromSession() {
+        return $_SESSION['username'];
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-
+require_once("loginModel.php");
 class loginView{
 
 
@@ -8,11 +8,20 @@ class loginView{
 	private static $cookiePassword = "Password";
 	private $userAgent;
 	private $userAgent2;
+    private $user;
 
+    public function __construct() {
+        $this->m_loginModel = new loginModel();
+
+    }
+    //sets variable to present which user is logged in
+    public function loggedInUserHandler($user) {
+        $this->user = $user;
+    }
 	public function UsernameAndPasswordCorrectMess(){
-
+        $user = $this->m_loginModel->getUsernameFromSession();
 		return $UserPassCorrMess = "
-				<h2>Admin är Inloggad</h2><br><br>
+				<h2>$user är Inloggad</h2><br><br>
 				<p>Inloggningen lyckades</p>
 				<form method='post'>
 				<input type='submit' name='Logout' value='Logga ut'>
@@ -22,9 +31,9 @@ class loginView{
 	}
 
 	public function CookieLoginMess(){
-
+        $user = $this->m_loginModel->getUsernameFromSession();
 		return $CookieLogin =  "
-				<h2>Admin är Inloggad</h2><br><br>
+				<h2>$user är Inloggad</h2><br><br>
 				<p>Inloggningen lyckades och vi kommer ihåg dig nästa gång</p>
 				<form method='post'>
 				<input type='submit' name='Logout' value='Logga ut'>
@@ -33,9 +42,9 @@ class loginView{
 	}
 
 	public function CookieLoginNoSess(){
-
+        $user = $this->m_loginModel->getUsernameFromSession();
 		return $CookieLoginNoSessvar = "
-				<h2>Admin är Inloggad</h2><br><br>
+				<h2>$user är Inloggad</h2><br><br>
 				<p>Inloggningen lyckades via cookies</p>
 				<form method='post'>
 				<input type='submit' name='Logout' value='Logga ut'>
@@ -58,9 +67,9 @@ class loginView{
 	}
 
 	public function AlreadyLoggedInUser(){
-
+        $user = $this->m_loginModel->getUsernameFromSession();
 		return $AlreadyLoggedinMess  = "
-				<h2>Admin är Inloggad</h2><br>
+				<h2>$user är Inloggad</h2><br>
 				<form method='post'>
 				<input type='submit' name='Logout' value='Logga ut'>
 				</form>
@@ -149,7 +158,7 @@ class loginView{
 	Lösenord: <input type='password' name='password'>
 	Håll mig inloggad: <input type='checkbox' name='checkbox'>
 	<input type='submit' name='Login' value='Logga in'>
-	<input type='submit' name='AddUserButton' action='?Register' value='Lägg till användare'><br>
+	<input type='submit' name='AddUserButton' value='Registrera'><br>
 
 	</form>";
 
@@ -163,7 +172,7 @@ class loginView{
 	Lösenord: <input type='password' name='password'>
 	Håll mig inloggad: <input type='checkbox' name='checkbox'>
 	<input type='submit' name='Login' value='Logga in'>
-	<input type='submit' name='AddUserButton' value='Lägg till användare'><br>
+	<input type='submit' name='AddUserButton' value=Registrera><br>
 
 	</form>","");
 
@@ -178,11 +187,27 @@ class loginView{
 	Lösenord: <input type='password' name='password'>
 	Håll mig inloggad: <input type='checkbox' name='checkbox'>
 	<input type='submit' name='Login' value='Logga in'>
+	<input type='submit' name='AddUserButton' value=Registrera><br>
 
 	</form>","");
 
 
 	}
+    public function displayFormAddUserSuccess($message){
+
+        $this->render("$message
+    <form method='post'>
+    <p>Registrering av ny användare lyckades</p>
+	Användarnamn: <input type='text' name='username'>
+	Lösenord: <input type='password' name='password'>
+	Håll mig inloggad: <input type='checkbox' name='checkbox'>
+	<input type='submit' name='Login' value='Logga in'>
+	<input type='submit' name='AddUserButton' value=Registrera><br>
+
+	</form>","");
+
+
+    }
 
 	public function render($body,$title){
 
@@ -203,7 +228,7 @@ class loginView{
 	<html>
 	<head>
 	<meta charset='UTF-8'>
-	<title>Labb 2</title>
+	<title>Labb 4</title>
 	</head>
 	<body>
 		$body<br>
@@ -256,6 +281,10 @@ class loginView{
 
 
 
+    public function showLoginAddUserSucceed(){
+        return $this->displayFormAddUserSuccess($this->NoInput());
+    }
+
 	public function DisplayEmpty(){
 
 	 return $this->displayForm($this->UsernameAndPasswordEmpty());
@@ -276,7 +305,6 @@ class loginView{
 	}
 
 	public function DisplayEmptyPassword(){
-
 		return $this->displayFormSaveUser($this->UsernameCorrPasswordEmpty(),$this->getUsername());
 	}
 
@@ -329,8 +357,6 @@ class loginView{
 
 		echo $html;
 	}
-
-
 
     public function didUserPressAddUser(){
 

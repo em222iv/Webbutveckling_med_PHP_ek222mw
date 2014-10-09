@@ -31,7 +31,7 @@ $this->m_loginModel = new loginModel();
         }
         //if user pressed login, a session i started to keep track where he is navigating
         // since the code i got didnt use any form actions or gets i kept it that way
-        if($_SESSION["addform"]){
+        if(isset($_SESSION["addform"])){
             //check if the registerbutton was clicked
             if($this->m_AddUserView->getNewUserInfo()){
                 //compares if the input was valid

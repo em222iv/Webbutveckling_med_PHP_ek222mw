@@ -4,16 +4,16 @@ session_start();
 
 class loginModel{
 
-    protected $dbUsername = 'eerie_se';
-    protected $dbPassword = 'NyUYN8xk';
-    protected $dbConnstring = 'mysql:host=eerie.se.mysql;dbname=eerie_se';
+    protected $dbUsername = 'root';
+    protected $dbPassword = 'root';
+    protected $dbConnstring = 'mysql:host=localhost;dbname=users';
     protected $dbConnection;
     protected $dbTable;
     private $errorMessage;
     private $username;
 
     //connection was earlier in mysql. changed to PDO.
-	private function connectdb(){
+    private function connectdb(){
 
         if ($this->dbConnection == NULL)
             $this->dbConnection = new \PDO($this->dbConnstring, $this->dbUsername, $this->dbPassword);
@@ -27,15 +27,15 @@ class loginModel{
     public function insertUserToDB($name,$pass){
 
         $db = $this->connectdb();
-
+        $_SESSION["username"] = $name;
         $sql = "INSERT INTO users (username,password) VALUES (:username,:password)";
 
-            $q = $db->prepare($sql);
+        $q = $db->prepare($sql);
 
-            $hash = password_hash($pass,PASSWORD_BCRYPT);
+        $hash = password_hash($pass,PASSWORD_BCRYPT);
 
-            $q->execute(array(':username'=>$name,
-                              ':password'=>$hash));
+        $q->execute(array(':username'=>$name,
+            ':password'=>$hash));
 
     }
     //checks if any of the input was faulty
@@ -59,7 +59,7 @@ class loginModel{
             return false;
         }
         if(strlen($username) < 3){
-             $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken";
+            $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken";
             return false;
         }
 
@@ -93,7 +93,7 @@ class loginModel{
 
 
     //I would have wanted to combine the compare methods from here on. But i ran out of time.
-	public function comparePasswordSucced($username, $password){
+    public function comparePasswordSucced($username, $password){
 
         $db = $this->connectdb();
         $_SESSION["username"] = $username;
@@ -109,55 +109,29 @@ class loginModel{
         $db_password = $result[2];
 
 
-		 if($username == $db_username && password_verify($password, $db_password))
-		 {
-		 	return true;
-		 }
+        if($username == $db_username && password_verify($password, $db_password))
+        {
+            return true;
+        }
 
-		 return false;
-
-
-	}
-
-	public function encryptPassword($pw){
-
-		return base64_encode($pw);
-	}
-
-	public function decodePassword($pwcrypt){
-
-		return base64_decode($pwcrypt);
-	}
+        return false;
 
 
+    }
 
-	public function comparePasswordWrongPass($username, $password){
+    public function encryptPassword($pw){
 
-        $db = $this->connectdb();
+        return base64_encode($pw);
+    }
 
-        $sql = "SELECT * FROM users WHERE username  = ?";
-        $params = array($username);
+    public function decodePassword($pwcrypt){
 
-        $query = $db -> prepare($sql);
-        $query -> execute($params);
-
-        $result = $query -> fetch();
-        $db_username = $result[1];
-        $db_password = $result[2];
-
-		 if($username == $db_username && !password_verify($password, $db_password))
-		 {
-		 	return true;
-		 }
-
-		 return false;
+        return base64_decode($pwcrypt);
+    }
 
 
 
-
-	}	
-
-	public function comparePasswordWrongUsername($username, $password){
+    public function comparePasswordWrongPass($username, $password){
 
         $db = $this->connectdb();
 
@@ -171,19 +145,19 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username !== $db_username && password_verify($password, $db_password))
-		 {
-		 	return true;
-		 }
+        if($username == $db_username && !password_verify($password, $db_password))
+        {
+            return true;
+        }
 
-		 return false;
-
-
+        return false;
 
 
-	}	
 
-	public function comparePasswordAllWrong($username, $password){
+
+    }
+
+    public function comparePasswordWrongUsername($username, $password){
 
         $db = $this->connectdb();
 
@@ -197,15 +171,41 @@ class loginModel{
         $db_username = $result[1];
         $db_password = $result[2];
 
-		 if($username !== $db_username && !password_verify($password, $db_password))
-		 {
-		 	return true;
-		 }
+        if($username !== $db_username && password_verify($password, $db_password))
+        {
+            return true;
+        }
 
-		 return false;
+        return false;
 
 
-	}
+
+
+    }
+
+    public function comparePasswordAllWrong($username, $password){
+
+        $db = $this->connectdb();
+
+        $sql = "SELECT * FROM users WHERE username  = ?";
+        $params = array($username);
+
+        $query = $db -> prepare($sql);
+        $query -> execute($params);
+
+        $result = $query -> fetch();
+        $db_username = $result[1];
+        $db_password = $result[2];
+
+        if($username !== $db_username && !password_verify($password, $db_password))
+        {
+            return true;
+        }
+
+        return false;
+
+
+    }
 
     public function loggedInUser($username) {
         $db = $this->connectdb();
@@ -225,54 +225,54 @@ class loginModel{
         $_SESSION["addform"] = true;
     }
 
-	public function isLoggedIn()
-	{
+    public function isLoggedIn()
+    {
 
 
-		if(isset($_SESSION["SessionUsername"])){
+        if(isset($_SESSION["SessionUsername"])){
 
-		$saveUserSession = $_SESSION["SessionUsername"];
-
-
-		return true;
-		}
-		return false;
-	}
-
-	public function Logout(){
-
-		
-		session_unset($_SESSION["SessionUsername"]);
-		setcookie("Username",NULL);
-		setcookie("Password", NULL);
+            $saveUserSession = $_SESSION["SessionUsername"];
 
 
-	}
+            return true;
+        }
+        return false;
+    }
 
-	public function Login(){
+    public function Logout(){
 
-		$_SESSION["SessionUsername"] = true;
 
-	}
+        session_unset($_SESSION["SessionUsername"]);
+        setcookie("Username",NULL);
+        setcookie("Password", NULL);
 
-	public function setAgent($agent){
 
-		if(isset($_SESSION["SessionAgent"]) == false)
-		{
-			$_SESSION["SessionAgent"] = $agent;
-			return true;
-		}
-		return false;
-	}
+    }
 
-	public function compareAgent($agent){
-			
-		if($_SESSION['SessionAgent'] === $agent){
-			return true;
+    public function Login(){
 
-		} 
-		return false;
-	}
+        $_SESSION["SessionUsername"] = true;
+
+    }
+
+    public function setAgent($agent){
+
+        if(isset($_SESSION["SessionAgent"]) == false)
+        {
+            $_SESSION["SessionAgent"] = $agent;
+            return true;
+        }
+        return false;
+    }
+
+    public function compareAgent($agent){
+
+        if($_SESSION['SessionAgent'] === $agent){
+            return true;
+
+        }
+        return false;
+    }
 
     public function getErrorMessage() {
         return $this->errorMessage;

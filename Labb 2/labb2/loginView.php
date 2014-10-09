@@ -19,7 +19,9 @@ class loginView{
         $this->user = $user;
     }
 	public function UsernameAndPasswordCorrectMess(){
-        $user = $this->m_loginModel->getUsernameFromSession();
+
+            $user = $this->m_loginModel->getUsernameFromSession();
+
 		return $UserPassCorrMess = "
 				<h2>$user är Inloggad</h2><br><br>
 				<p>Inloggningen lyckades</p>
@@ -29,6 +31,21 @@ class loginView{
 				";
 
 	}
+
+
+    public function UsernameAndPasswordCorrectMessReg(){
+
+        $user = $this->m_loginModel->getUsernameFromSession();
+
+        return $UserPassCorrMess = "
+				<h2>$user är Inloggad</h2><br><br>
+				<p>Inloggningen lyckades</p>
+				<form method='post'>
+				<input type='submit' name='Logout' value='Logga ut'>
+				</form>
+				";
+
+    }
 
 	public function CookieLoginMess(){
         $user = $this->m_loginModel->getUsernameFromSession();
@@ -458,7 +475,6 @@ class loginView{
 
 
 	public function setAgent(){
-
 
 		$this->userAgent = $_SERVER['HTTP_USER_AGENT'];
 

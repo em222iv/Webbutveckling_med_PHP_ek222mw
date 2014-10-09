@@ -42,7 +42,7 @@ class login{
                     $this->m_loginModel->Login();
                     $this->m_loginView->setAgent();
                     $this->m_loginModel->setAgent($this->m_loginView->getAgent());
-                    return $this->m_loginView->UsernameAndPasswordCorrectMess();
+                    return $this->m_loginView->DisplaySuccessfulLogin();
 
                 }elseif($_SESSION["addform"]) {
                     //presenting error msgs

@@ -25,6 +25,7 @@ class login{
         //My code for lab4 start here and goes down to row 50.
 
         if($this->m_loginView->didUserPressAddUser()){
+            $this->m_AddUserView->valueHandler($this->m_loginModel->getUsername());
             $this->m_loginModel->addFormSession();
             return  $this->m_AddUserView->AddUserForm();
 

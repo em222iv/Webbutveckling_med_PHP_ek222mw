@@ -4,9 +4,9 @@ session_start();
 
 class loginModel{
 
-    protected $dbUsername = 'root';
-    protected $dbPassword = 'root';
-    protected $dbConnstring = 'mysql:host=localhost;dbname=users';
+    protected $dbUsername = 'eerie_se';
+    protected $dbPassword = 'NyUYN8xk';
+    protected $dbConnstring = 'mysql:host=eerie.se.mysql;dbname=eerie_se';
     protected $dbConnection;
     protected $dbTable;
     private $errorMessage;
@@ -27,7 +27,7 @@ class loginModel{
     public function insertUserToDB($name,$pass){
 
         $db = $this->connectdb();
-        $_SESSION["username"] = $name;
+
         $sql = "INSERT INTO users (username,password) VALUES (:username,:password)";
 
         $q = $db->prepare($sql);
@@ -40,7 +40,8 @@ class loginModel{
     }
     //checks if any of the input was faulty
     public function compareAddUserInfo($username,$password,$verifyPassword) {
-
+        $_SESSION["username"] = $username;
+        $this->username = $username;
         if(strlen($username) < 3 && strlen($password) < 6 && strlen($verifyPassword < 6)){
             $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken.</br> Lösenordet är för kort. Minst 6 tecken";
             return false;
@@ -51,14 +52,17 @@ class loginModel{
             return false;
         }
         if(strlen($password) < 6){
+            $this->username = $username;
             $this->errorMessage = "Lösenordet är för kort. Minst 6 tecken";
             return false;
         }
         if(strlen($verifyPassword) < 6){
+            $this->username = $username;
             $this->errorMessage = "Lösenordet är för kort. Minst 6 tecken";
             return false;
         }
         if(strlen($username) < 3){
+            $this->username = $username;
             $this->errorMessage = "Användarenamet är för kort. Minst 3 tecken";
             return false;
         }
@@ -77,6 +81,7 @@ class loginModel{
         $db_password = $result[2];
 
         if($username == $db_username || strlen($username) < 3){
+            $this->username = $username;
             $this->errorMessage = "Användarnamnet är redan upptaget";
             return false;
         }
